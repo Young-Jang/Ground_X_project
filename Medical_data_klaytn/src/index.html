@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="theme-color" content="#000000">
+  <title>Klaytn Medical Data</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+    integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+    crossorigin="anonymous"></script>
+  <script src="index.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+    integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+</head>
+
+<body>
+  <div class="container"> 
+    <div class="row">
+      <div class="col-md-8 col-md-offset-2">
+        <h1 class="text-center">Klaytn Project</h1>
+        <h3 class="text-center">의료데이터 열람 서비스</h3>
+        <h3 class="text-center" id="mode"></h3>
+        <h3 class="text-center" id="myAddress"></h3>
+        <h3 class="text-center" id="transactionTest"></h3>
+        <hr />
+      </div>
+    </div>
+    <div class="container" >
+        <button type="button" 
+        class="btn btn-info pull-right"
+        id="logout"
+        onclick="App.TestLogout()"
+        >
+        Logout
+      </button>
+      <button type="button" 
+        class="btn btn-info pull-right"
+        id="user10"
+        onclick="App.TestLogin('manager','0xf540096dda1283a3c8d52b1fe80bc111f8ab9b99e5820371cab5cf0e21bccd1f')"
+        >
+        manager
+      </button>
+      
+      <button type="button"
+        class="btn btn-info pull-right"
+        id="user9"
+        onclick="App.TestLogin('xx손해보험','0x7779f6f689430320987d0b2ad39668a6cc247b49c9b0bb7e8b01e7dfa53dec3c')"
+        >
+        user1
+      </button>
+      
+      <button type="button"
+        class="btn btn-info pull-right"
+        id="user8"
+        onclick="App.TestLogin('xx화재','0xb230f24080a7368dabae75dc372e05a183d20224b45e1640c430f7d6c60b08fb')"
+        >
+        user2
+      </button>
+
+      <button type="button"
+        class="btn btn-info pull-right"
+        id="line1"
+        onclick="App.reading(1)"
+        >
+        1 line
+      </button>
+        <button type="button"
+        class="btn btn-info pull-right"
+        id="line3"
+        onclick="App.reading(3)"
+        >
+        3 line
+      </button>
+      <button type="button"
+        class="btn btn-info pull-right"
+        id="line5"
+        onclick="App.reading(5)"
+        >
+        5 line
+      </button>
+      <button type="button"
+      class="btn btn-info default"
+      id="test1"
+      onclick="App.findUsers('0xD22E6E595bB40ABE9B4e75F120126c22634d98eC')"
+      >
+      test user1 조회
+    </button>
+      <button type="button"
+      class="btn btn-info default"
+      id="test2"
+      onclick="App.findUsers('0x3b0e7B486ceF8334EcE5330c916870053c7AD7f1')"
+      >
+      test user2 조회
+    </button>
+    </div>
+  </br>
+    <div class="text-center" id="company"></div>
+    <div class="text-center" id="look_cnt"></div>
+    <div class="text-center" id="login_cnt"></div>
+    <div class="text-center" id="finduser"></div>
+    <div class="text-center" id="tx_cnt"></div>
+    <div class="text-center" id="test"></div>
+
+    <div className="container">
+      <table className="table.type11" id="TxTable">
+        <thead>
+          <tr>
+            <th>TxType</th>
+            <th>BlockNumber</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Gas</th>
+            <th>GasPrice</th>
+            <th>checkURL</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+    <br />
+    <div id="spin"></div>
+  </div>
+</body>
+
+</html>
+
+<style>
+  .yellow-box {
+    background-color: #FFC;
+    padding: 2rem;
+    margin: 0 auto;
+    max-width: 500px;
+    font-size: 80px;
+  }
+
+  #timer {
+    font-size: 80px;
+    color: red;
+  }
+
+  #test1{
+    visibility: hidden;
+  }
+
+  #test2{
+    visibility: hidden;
+  }
+
+
+  @keyframes spinner-line-fade-more {
+    0%, 100% {
+      opacity: 0;
+    }
+    1% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes spinner-line-fade-quick {
+    0%, 39%, 100% {
+      opacity: 0.25;
+    }
+    40% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes spinner-line-fade-default {
+    0%, 100% {
+      opacity: 0.22;
+    }
+    1% {
+      opacity: 1;
+    }
+  }
+  button {margin:10px;}
+  #TxTable{
+    border-collapse: separate;
+    border-spacing: 1px;
+    text-align: center;
+    line-height: 1.5;
+    margin: 20px 10px;
+  }
+  #TxTable th {
+      width: 155px;
+      padding: 10px;
+      font-weight: bold;
+      vertical-align: top;
+      color: #fff;
+      background: #554869 ;
+  }
+  #TxTable td {
+      width: 155px;
+      padding: 10px;
+      vertical-align: top;
+      border-bottom: 1px solid #ccc;
+      background: #eee;
+  }
+</style>
