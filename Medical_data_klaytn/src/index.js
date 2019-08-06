@@ -7,23 +7,33 @@ const config={
 }
 const cav = new Caver(config.rpcURL);
 const mdContract = new cav.klay.Contract(DEPLOYED_ABI, DEPLOYED_ADDRESS);
+
 const App = {
 
   state:{
     cnt: 0,
   },
 
-  
-  TestLogout:async function(){
+  txInfo:{
+    tag: "",
+    file: "",
+    cnt: 0,
+  },
+
+  UserReset: async function(){
+    this.setInit();
+    location.reload();
+  },
+
+  TestLogout: async function(){
     sessionStorage.removeItem('walletInstance');
     location.reload();
   },
 
   start: async function () {
-    this.state.cnt = sessionStorage.getItem('cnt');
     const walletFromSession = sessionStorage.getItem('walletInstance');
-
-    if(walletFromSession){
+    this.state.cnt = sessionStorage.getItem(await this.callCompnayName()+'cnt');
+  if(walletFromSession){
       try{
         cav.klay.accounts.wallet.add(JSON.parse(walletFromSession));
         this.changeUI(JSON.parse(walletFromSession));
@@ -33,21 +43,25 @@ const App = {
     }
   },
 
-  reading: async function(num){
+  Download: async function(num){
     this.state.cnt++;
-    sessionStorage.setItem('cnt',this.state.cnt);
+    sessionStorage.setItem(await this.callCompnayName()+'cnt',this.state.cnt);
     var spinner = this.showSpinner();
-    sessionStorage.removeItem('latestTx');
-    mdContract.methods.reading(num).send({
+    //file수정
+    mdContract.methods.Download(num,"patient").send({
       type:'SMART_CONTRACT_EXECUTION',
       from: JSON.parse(sessionStorage.getItem('walletInstance')).address ,
       gas: '250000',
-      data: '0x11321241241212412414251'
-    }).then(function(receipt){
+    }).then(async function(receipt){
       if(receipt.status){
         spinner.stop();
-        alert(JSON.parse(sessionStorage.getItem('walletInstance')).address + "계정 "+num+"개 열람"); 
-        sessionStorage.setItem('tx'+sessionStorage.getItem('cnt')%10,JSON.stringify(receipt));
+        alert(JSON.parse(sessionStorage.getItem('walletInstance')).address + "계정 "+num+"개 데이터 다운로드"); 
+        var str = await App.callCompnayName();
+        sessionStorage.setItem(str+'tx'+sessionStorage.getItem(str+'cnt'),JSON.stringify(receipt));
+        App.txInfo.tag="다운로드";
+        App.txInfo.file="patient";
+        App.txInfo.cnt=num;    
+        sessionStorage.setItem(str+'Info'+sessionStorage.getItem(str+'cnt'),JSON.stringify(App.txInfo));
         location.reload();
       }
     }).on('error',function(error){
@@ -55,16 +69,38 @@ const App = {
     })
   },
 
-  setInit: async function(){
-    document.getElementById("myAddress").style.visibility='visible';
-    for(var i=0;i<=sessionStorage.getItem('cnt');i++)
-        sessionStorage.removeItem('tx'+i);
-    sessionStorage.setItem('cnt',0);
+  reading: async function(num){
+    this.state.cnt++;
+    sessionStorage.setItem(await this.callCompnayName()+'cnt',this.state.cnt);
+    var spinner = this.showSpinner();
+    //file수정
+    mdContract.methods.reading(num,"patient").send({
+      type:'SMART_CONTRACT_EXECUTION',
+      from: JSON.parse(sessionStorage.getItem('walletInstance')).address ,
+      gas: '250000',
+    }).then(async function(receipt){
+      if(receipt.status){
+        spinner.stop();
+        alert(JSON.parse(sessionStorage.getItem('walletInstance')).address + "계정 "+num+"개 데이터 조회"); 
+        var str = await App.callCompnayName();
+        var cnts = sessionStorage.getItem(str+'cnt');
+        sessionStorage.setItem(str+'tx'+cnts,JSON.stringify(receipt));
+        App.txInfo.tag="데이터 조회";
+        App.txInfo.file="patient";
+        App.txInfo.cnt=num;     
+        sessionStorage.setItem(str+'Info'+cnts,JSON.stringify(App.txInfo));
+        App.transactionList(sessionStorage.getItem(str+'tx'+cnts),sessionStorage.getItem(str+'Info'+cnts));    
+      }
+    }).on('error',function(error){
+    })
   },
 
-  testing: async function(){
-    return await mdContract.methods.test().call();
-   },
+  setInit: async function(){
+    var str = await this.callCompnayName();
+    for(var i=0;i<=sessionStorage.getItem(str+'cnt');i++)
+        sessionStorage.removeItem(str+'tx'+i);
+    sessionStorage.setItem(str+'cnt',0);
+  },
 
   callOwner: async function () {
     return await mdContract.methods.owner().call();
@@ -74,8 +110,12 @@ const App = {
     return await mdContract.methods.getBalance().call();
   },
 
-  callUserCount: async function(){
-    return await mdContract.methods.getCount(this.getWallet().address).call();
+  callLookCount: async function(filename){
+    return await mdContract.methods.getLookCount(this.getWallet().address,filename).call();
+  },
+
+  callDownloadCount: async function(filename){
+    return await mdContract.methods.getDownloadCount(this.getWallet().address,filename).call();
   },
 
   callLoginCount: async function(){
@@ -91,66 +131,117 @@ const App = {
   },
 
   TestLogin: async function (id,privateKey) {
-    this.setInit();
     var spinner = this.showSpinner();
     try{
-      this.integrateWallet(id,privateKey);
+     await this.integrateWallet(id,privateKey);
     }catch(e){
       document.getElementById("look_cnt").textContent= "";
       document.getElementById("login_cnt").textContent="";
      }
-      mdContract.methods.login(id).send({
+     mdContract.methods.login(id).send({
         type:'SMART_CONTRACT_EXECUTION',
         from: JSON.parse(sessionStorage.getItem('walletInstance')).address ,
         gas: '250000'
-      }).then(function(receipt){
+      }).then(async function(receipt){
         if(receipt.status){
           spinner.stop();
           alert(JSON.parse(sessionStorage.getItem('walletInstance')).address + "로그인 성공");
-          location.reload();       
+          var str = await App.callCompnayName();
+          sessionStorage.setItem(str+'cnt',Number(sessionStorage.getItem(str+'cnt'))+1);
+          sessionStorage.setItem(str+'tx'+sessionStorage.getItem(str+'cnt'),JSON.stringify(receipt));
+          App.txInfo.tag="로그인";
+          App.txInfo.file="";
+          App.txInfo.cnt=0;
+          sessionStorage.setItem(str+'Info'+sessionStorage.getItem(str+'cnt'),JSON.stringify(App.txInfo));   
+          location.reload();
          }
       })
   },
 
   integrateWallet: function (id,privateKey) {
-    console.log('로그인 오류');    
     const walletInstance = cav.klay.accounts.privateKeyToAccount(privateKey);
     cav.klay.accounts.wallet.add(walletInstance);
-    document.getElementById("test").textContent=5;
     sessionStorage.setItem('walletInstance',JSON.stringify(walletInstance));
   },
 
   findUsers: async function(add){
-    var a = await mdContract.methods.findUsers(add).call({from: this.getWallet().address});
-    a=JSON.stringify(a);
-    document.getElementById("finduser").textContent= "회사명: "+JSON.parse(a).company +"  열람횟수: "+JSON.parse(a).look +"  접속횟수: "+JSON.parse(a).connect;
+    $('#TxTable>tbody').empty();
+    $('#UserTable>tbody').empty();
+    $('#UserDataTable>tbody').empty();
+    var str = await mdContract.methods.getCompany(add).call();
+   
+    $('#UserTable > tbody:last')
+    .append('<tr><td>'+await this.callCompnayName()+'</td>'
+    +'<td>'+await this.callLoginCount()+'</td>'
+    +'<td>'+this.state.cnt+'</td></tr>');
+
+    for(var i=0;i<10;i++)
+    {
+      //file수정
+      var filename = "patient";
+      var temp = await mdContract.methods.findDataAccess(add,filename).call({from: this.getWallet().address});
+      temp = JSON.stringify(temp);
+      $('#UserDataTable > tbody:last')
+      .append('<tr><td>'+filename+'</td>'
+      +'<td>'+JSON.parse(temp).Look+'</td>'
+      +'<td>'+JSON.parse(temp).Download+'</td></tr>');
+    }
+    for(var i=sessionStorage.getItem(str+'cnt');i>=0;i--)
+    {
+       this.transactionList(sessionStorage.getItem(str+'tx'+i),sessionStorage.getItem(str+'Info'+i));
+    }
   },
 
-  transactionList: async function(Tx){
-    $('#TxTable > tbody:last').
-    append('<tr><td>'+JSON.parse(Tx).type+'</td>'+
-    '<td>'+JSON.parse(Tx).blockNumber+'</td>'+
-    '<td>'+JSON.parse(Tx).from+'</td>'+
-    '<td>'+JSON.parse(Tx).to+'</td>'+
-    '<td>'+parseInt(JSON.parse(Tx).gas,16)+'</td>'+
-    '<td>'+parseInt(JSON.parse(Tx).gasPrice,16)+'</td>'+
-    '<td>'+parseInt(JSON.parse(Tx).input)+'</td>'+
+  timeConverter: function(UNIX_timestamp){
+    var a = new Date(UNIX_timestamp * 1000);
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var year = a.getFullYear();
+    var month = months[a.getMonth()];
+    var date = a.getDate();
+    var hour = a.getHours();
+    var min = a.getMinutes();
+    var sec = a.getSeconds();
+    var time = year + '.' + a.getMonth() + '.' + date + ' / ' + hour + ':' + min + ':' + sec ;
+    return time;
+  },
+
+  transactionList: async function(Tx,Info){
+    var block;
+    await cav.klay.getBlock(JSON.parse(Tx).blockNumber).then(function(receipt){
+      block=JSON.stringify(receipt);
+    });
+    $('#TxTable > tbody:last')
+    .append('<tr><td>'+ this.timeConverter(parseInt(JSON.parse(block).timestamp,16))+'</td>'+
+    '<td>'+JSON.parse(Info).tag+'</td>'+
+    '<td>'+JSON.parse(Info).file+'</td>'+
+    '<td>'+JSON.parse(Info).cnt+" Row"+'</td>'+
     '<td>'+`<p><a href='https://baobab.scope.klaytn.com/tx/${JSON.parse(Tx).transactionHash}'
     target='_blank'>check</a></p>`+'</td>'+
     '</td></tr>');
   },
 
+  userInfoList: async function(){
+    $('#UserTable > tbody:last')
+    .append('<tr><td>'+await this.callCompnayName()+'</td>'
+    +'<td>'+await this.callLoginCount()+'</td>'
+    +'<td>'+this.state.cnt+'</td></tr>');
+  },
+
+  userDataList: async function(){
+    for(var i=0;i<10;i++)
+    {
+      //file수정
+      var filename = "patient";
+      $('#UserDataTable > tbody:last')
+      .append('<tr><td>'+filename+'</td>'
+      +'<td>'+await this.callLookCount(filename)+'</td>'
+      +'<td>'+await this.callDownloadCount(filename)+'</td></tr>');
+    }
+  },
+  
   changeUI: async function (walletInstance) {
     document.getElementById("myAddress").textContent="내 주소: "+walletInstance.address;
-    document.getElementById("look_cnt").textContent= "내 열람 횟수: " +await this.callUserCount()+"회";
-    document.getElementById("login_cnt").textContent= "내 접속 횟수: " +await this.callLoginCount()+"회";
-    document.getElementById("company").textContent=await this.callCompnayName();
-    document.getElementById("tx_cnt").textContent="TX 횟수: "+this.state.cnt;
 
-     for(var i=this.state.cnt;i>=0;i--)
-     {
-        this.transactionList(sessionStorage.getItem('tx'+i));
-     }
     if((await this.callOwner()).toLowerCase() === walletInstance.address){
       document.getElementById("test1").style.visibility='visible';
       document.getElementById("test2").style.visibility='visible';
@@ -159,7 +250,10 @@ const App = {
       document.getElementById("login_cnt").style.visibility='hidden';
       document.getElementById("company").style.visibility='hidden';
       document.getElementById("tx_cnt").style.visibility='hidden';
-      document.getElementById("TxTable").style.visibility='hidden';
+      document.getElementById("TxTable").style.visibility='visible';
+      document.getElementById("DBbutton").style.visibility='hidden';
+      document.getElementById("files").style.visibility='hidden';
+      document.getElementById("OutputTable").style.visibility='hidden';
       document.getElementById("mode").textContent="관리자 모드";
     }
     else{
@@ -171,7 +265,45 @@ const App = {
       document.getElementById("company").style.visibility='visible';
       document.getElementById("tx_cnt").style.visibility='visible';
       document.getElementById("TxTable").style.visibility='visible';
+      document.getElementById("DBbutton").style.visibility='visible';
+      document.getElementById("files").style.visibility='visible';
+      document.getElementById("OutputTable").style.visibility='visible';
       document.getElementById("mode").textContent="유저 모드";
+      for(var i=this.state.cnt;i>=this.state.cnt-10;i--)
+      {
+         this.transactionList(
+          sessionStorage.getItem(await this.callCompnayName()+'tx'+i)
+         ,sessionStorage.getItem(await this.callCompnayName()+'Info'+i)
+         );
+      }
+      this.userInfoList();
+      this.userDataList();
+    }
+  },
+  sendCheck: function(){
+    var count =0;
+    var box = document.getElementsByName("patient");
+    for(var i=0; i<box.length; i++) {
+        if(box[i].checked == true) {
+            count++;
+        }
+    }
+    this.Download(count);
+  },
+
+  check_all: function(){
+    var box = document.getElementsByName("patient");
+    var allcheck = document.getElementById("checkAll");
+    if(!allcheck.checked)
+    { 
+      for(var i=0; i<box.length; i++) {
+        box[i].checked=false;
+      }
+    }
+    else{
+      for(var i=0; i<box.length; i++) {
+        box[i].checked=true;
+      }
     }
   },
 
@@ -179,7 +311,6 @@ const App = {
     var target = document.getElementById("spin");
     return new Spinner(opts).spin(target);
   },
-
 };
 
 window.App = App;

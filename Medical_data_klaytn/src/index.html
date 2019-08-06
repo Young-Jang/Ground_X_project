@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta name="theme-color" content="#000000">
   <title>Klaytn Medical Data</title>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
     integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
     crossorigin="anonymous"></script>
@@ -23,11 +23,17 @@
         <h3 class="text-center">의료데이터 열람 서비스</h3>
         <h3 class="text-center" id="mode"></h3>
         <h3 class="text-center" id="myAddress"></h3>
-        <h3 class="text-center" id="transactionTest"></h3>
         <hr />
       </div>
     </div>
+    
     <div class="container" >
+        <button type="button" 
+        class="btn btn-info pull-right"
+        id="reset"
+        onclick="App.UserReset()"
+        >
+        UserReset
         <button type="button" 
         class="btn btn-info pull-right"
         id="logout"
@@ -62,21 +68,21 @@
       <button type="button"
         class="btn btn-info pull-right"
         id="line1"
-        onclick="App.reading(1)"
+        onclick="App.Download(1)"
         >
         1 line
       </button>
         <button type="button"
         class="btn btn-info pull-right"
         id="line3"
-        onclick="App.reading(3)"
+        onclick="App.Download(3)"
         >
         3 line
       </button>
       <button type="button"
         class="btn btn-info pull-right"
         id="line5"
-        onclick="App.reading(5)"
+        onclick="App.Download(5)"
         >
         5 line
       </button>
@@ -97,22 +103,46 @@
     </div>
   </br>
     <div class="text-center" id="company"></div>
+    <div class="text-center" id="download_cnt"></div>
     <div class="text-center" id="look_cnt"></div>
     <div class="text-center" id="login_cnt"></div>
     <div class="text-center" id="finduser"></div>
     <div class="text-center" id="tx_cnt"></div>
     <div class="text-center" id="test"></div>
 
+    
+    <table className="table.type11" id="UserTable">
+        <thead>
+          <tr>
+            <th>유저명</th>
+            <th>접속 횟수</th>
+            <th>Tx발생 횟수</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <table className="table.type11" id="UserDataTable">
+        <thead>
+          <tr>
+            <th>파일명</th>
+            <th>데이터 조회수</th>
+            <th>데이터 다운로드 횟수</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
     <div className="container">
       <table className="table.type11" id="TxTable">
         <thead>
           <tr>
-            <th>TxType</th>
-            <th>BlockNumber</th>
-            <th>From</th>
-            <th>To</th>
-            <th>Gas</th>
-            <th>GasPrice</th>
+            <th>Time</th>
+            <th>Tx내용</th>
+            <th>파일명</th>
+            <th>데이터량</th>
             <th>checkURL</th>
           </tr>
         </thead>
@@ -120,6 +150,60 @@
         </tbody>
       </table>
     </div>
+    <input type="file" id="files" name="files[]" multiple />
+    <output id="list"></output>
+    
+    <table id="OutputTable">
+      <thead><tr>
+      </tr></thead>
+      <tbody>
+        <tr>
+        </tr>
+      </tbody>
+    </table>
+    <script>
+      var table = document.getElementById('OutputTable');
+      function parseCSV(text, lineTerminator, cellTerminator) {     
+        //break the lines apart
+        var lines = text.split(lineTerminator);
+        var hdinformation = lines[0].split(',');
+        App.reading(lines.length-2);
+        $('#OutputTable > thead:last')
+        .append('<th><input type="checkbox" id="checkAll" onclick="App.check_all()"></th>');
+        for(var k = 0; k < hdinformation.length; k++){
+          $('#OutputTable > thead:last').append('<th>'+hdinformation[k]+'</th>')
+        }
+        for(var j = 1; j<lines.length; j++){
+          var information =lines[j].split(',');
+          if(lines[j] != ""){
+          $('#OutputTable > tbody:last')
+          .append('<td><input type="checkbox" name="patient"></td>');
+           for(var k = 0; k < information.length; k++){
+            $('#OutputTable > tbody:last').append('<td>'+information[k]+'</td>');
+          }
+          $('#OutputTable > tbody:last').append('<tr>');
+          }
+        }
+      }
+      function handleFileSelect(evt) {
+      var files = evt.target.files; // FileList object
+      // Loop through the FileList and populate the 'outputTable' with the data
+        for (var i = 0, f; f = files[i]; i++) {
+          var reader = new FileReader();
+          // Closure to capture the file information.
+          reader.onload = (function(theFile) {
+          return function(e) {         
+            //call the parse function with the proper line terminator and cell terminator
+            parseCSV(e.target.result, '\n', ';');
+          };
+          })(f);
+          // Read the file as text
+          reader.readAsText(f, "euc-kr");
+        }
+      }
+      document.getElementById('files').addEventListener('change', handleFileSelect, false);
+</script>
+<button type="button" class="btn btn-info default" id="DBbutton" onclick="App.sendCheck()">데이터 조회</button>
     <br />
     <div id="spin"></div>
   </div>
@@ -136,9 +220,20 @@
     font-size: 80px;
   }
 
-  #timer {
-    font-size: 80px;
-    color: red;
+  #reset{
+    background: red;
+  }
+
+  #logout{
+    background: rgb(223, 66, 66);
+  }
+
+  #files{
+    visibility: hidden;
+  }
+
+  #DBbutton{
+    visibility: hidden;
   }
 
   #test1{
@@ -148,7 +243,6 @@
   #test2{
     visibility: hidden;
   }
-
 
   @keyframes spinner-line-fade-more {
     0%, 100% {
@@ -181,13 +275,15 @@
     border-collapse: separate;
     border-spacing: 1px;
     text-align: center;
+    vertical-align: center;
     line-height: 1.5;
-    margin: 20px 10px;
+    margin: auto;
   }
   #TxTable th {
       width: 155px;
       padding: 10px;
       font-weight: bold;
+      text-align: center;
       vertical-align: top;
       color: #fff;
       background: #554869 ;
@@ -196,6 +292,85 @@
       width: 155px;
       padding: 10px;
       vertical-align: top;
+      border-bottom: 1px solid #ccc;
+      background: #eee;
+  }
+
+  #UserTable{
+    border-collapse: separate;
+    border-spacing: 1px;
+    text-align: center;
+    vertical-align: center;
+    line-height: 1.5;
+    margin: auto;
+    margin-bottom: 20px;
+    margin-top: 20px;
+  }
+  #UserTable th {
+      width: 155px;
+      padding: 10px;
+      font-weight: bold;
+      vertical-align: top;
+      text-align: center;
+      color: #fff;
+      background: #554869 ;
+  }
+  #UserTable td {
+      width: 155px;
+      padding: 10px;
+      vertical-align: top;
+      border-bottom: 1px solid #ccc;
+      background: #eee;
+  }
+
+  #UserDataTable{
+    border-collapse: separate;
+    border-spacing: 1px;
+    text-align: center;
+    vertical-align: center;
+    line-height: 1.5;
+    margin: auto;
+    margin-bottom: 20px;
+    margin-top: 20px;
+  }
+  #UserDataTable th {
+      width: 155px;
+      padding: 10px;
+      font-weight: bold;
+      vertical-align: top;
+      text-align: center;
+      color: #fff;
+      background: #554869 ;
+  }
+  #UserDataTable td {
+      width: 155px;
+      padding: 10px;
+      vertical-align: top;
+      border-bottom: 1px solid #ccc;
+      background: #eee;
+  }
+
+  #OutputTable{
+    border-collapse: separate;
+    border-spacing: 1px;
+    text-align: center;
+    line-height: 1.5;
+    margin: 20px 10px;
+  }
+  #OutputTable th {
+      width: 155px;
+      padding: 10px;
+      font-weight: bold;
+      vertical-align: middle;
+      text-align: center;
+      color: #fff;
+      background: #1f4631 ;
+  }
+  #OutputTable td {
+      width: 155px;
+      padding: 10px;
+      vertical-align: middle;
+      text-align: center;
       border-bottom: 1px solid #ccc;
       background: #eee;
   }

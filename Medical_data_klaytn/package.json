@@ -1,8 +1,8 @@
 {
-  "name": "klay-dapp-boilerplate",
+  "name": "klay-dapp-medicalData",
   "version": "0.0.1",
   "description": "boilerplate for klaytn-based app",
-  "main": "truffle.js",
+  "main": "truffle-config.js",
   "scripts": {
     "build": "webpack",
     "dev": "webpack-dev-server"
@@ -11,9 +11,10 @@
     "caver-js": "0.0.2-z",
     "connect-privkey-to-provider": "^0.0.3",
     "keccak256": "^1.0.0",
-    "solc": "^0.4.25",
+    "solc": "^0.5.10",
     "spin.js": "^4.0.0",
-    "truffle": "^4.1.15"
+    "truffle": "^5.0.29",
+    "truffle-hdwallet-provider-klaytn": "^1.0.13-a"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^4.6.0",
