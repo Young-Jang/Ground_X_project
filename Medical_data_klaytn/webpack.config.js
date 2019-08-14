@@ -4,7 +4,7 @@ const fs = require('fs')
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
-  entry: "./src/index.js",
+  entry: "./index.js",
   mode: 'development',
   output: {
     filename: "index.js",
@@ -17,5 +17,25 @@ module.exports = {
     }),
     new CopyWebpackPlugin([{ from: "./src/index.html", to: "index.html"}])
   ],
-  devServer: { contentBase: path.join(__dirname, "dist"), compress: true }
+  devServer: { 
+    contentBase: path.join(__dirname, "dist"), 
+    compress: true,
+    disableHostCheck: true,
+    host: "0.0.0.0",
+    proxy: {
+      // /oauth URL 경로는 아래 proxy 서버를 이용한다.
+      '/oauth/' : {
+        target: 'http://localhost:8081',
+        changeOrigin : true,
+        pathRewrite: { // URL 경로를 변경하는 경우
+          '/api': ''
+        }
+      },
+      // /api URL 경로는 아래 proxy 서버를 이용한다.
+      '/api/' : {
+        target: 'http://localhost:8081',
+        changeOrigin : true
+      }
+    } 
+  }
 }
