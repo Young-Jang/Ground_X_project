@@ -17,8 +17,8 @@ router.get('/api/getUsername', (req, res, next) => {
     res.send({ username: os.userInfo().username });
 });
  
-router.post('/api/getData', (req, res) => {
-    mysql.query("select * from transactionlist where name =?",[req.body.name],(err, rows) => {
+router.post('/api/getData', (req, res) => {    
+mysql.query("select * from transactionlist where name =?",[req.body.name],(err, rows) => {
         if (!err) {
             console.log('getdata!');
             console.log(rows);
@@ -57,7 +57,7 @@ router.post('/api/getFilename', (req, res) => {
 });
 
 router.post('/api/setData', (req, res) => {
-    console.log(req.body);
+   // console.log(req.body);
     var tx = req.body;
     var sql = "INSERT INTO transactionlist (id, name, time, txinfo,filename,data,txnum) VALUES ?";
     var values = [
@@ -67,7 +67,7 @@ router.post('/api/setData', (req, res) => {
         if(error){
             throw error;
         }
-        console.log(result);
+     //   console.log(result);
     });
 }); 
   

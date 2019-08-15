@@ -25,7 +25,7 @@ module.exports = {
     proxy: {
       // /oauth URL 경로는 아래 proxy 서버를 이용한다.
       '/oauth/' : {
-        target: 'http://localhost:8081',
+        target: 'http://[::1]:8081',
         changeOrigin : true,
         pathRewrite: { // URL 경로를 변경하는 경우
           '/api': ''
@@ -33,7 +33,7 @@ module.exports = {
       },
       // /api URL 경로는 아래 proxy 서버를 이용한다.
       '/api/' : {
-        target: 'http://localhost:8081',
+        target: 'http://[::1]:8081',
         changeOrigin : true
       }
     } 

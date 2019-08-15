@@ -26,6 +26,12 @@ const App = {
 
   testLogout: async function(){
     sessionStorage.removeItem('walletInstance');
+    document.getElementById("user0").style.visibility='visible';
+    document.getElementById("user1").style.visibility='visible';
+    document.getElementById("user2").style.visibility='visible';
+    document.getElementById("user3").style.visibility='visible';
+    document.getElementById("user4").style.visibility='visible';
+    document.getElementById("user5").style.visibility='visible';
     location.reload();
   },
 
@@ -45,7 +51,9 @@ const App = {
       headers: new Headers( {'Content-Type': 'application/json'
     })
     });
-    fetch(request);
+    fetch(request).then(function(){
+		console.log("ok");}).catch(function(){
+console.log(error); });
   },
 
   start: async function () {
@@ -72,7 +80,7 @@ const App = {
     }).then(async function(receipt){
       if(receipt.status){
         spinner.stop();
-        alert(JSON.parse(sessionStorage.getItem('walletInstance')).address + "계정 "+num+"개 데이터 다운로드"); 
+        alert(JSON.parse(sessionStorage.getItem('walletInstance')).address + "계정 "+filename+'.csv파일에서 '+num+"ROW 데이터 다운로드"); 
         await App.dbSetTxinfo(
           await App.callCompnayName(), //name
           await App.blocktime(JSON.stringify(receipt)), //time
@@ -205,20 +213,9 @@ const App = {
       //file수정
       $('#UserDataTable > tbody:last')
       .append('<tr><td>'+filename[i].name+'.csv'+'</td>'
-      +'<td>'+ await mdContract.methods.getLookCount(add,filename[i].name).call()+'</td>'
-      +'<td>'+await mdContract.methods.getDownloadCount(add,filename[i].name).call()+'</td></tr>');
+      +'<td>'+ await mdContract.methods.getLookCount(add,filename[i].name).call()+' Row'+'</td>'
+      +'<td>'+await mdContract.methods.getDownloadCount(add,filename[i].name).call()+' Row'+'</td></tr>');
     }
-    // for(var i=0;i<10;i++)
-    // {
-    //   //file수정
-    //   var filename = "patient";
-    //   var temp = await mdContract.methods.findDataAccess(add,filename).call({from: this.getWallet().address});
-    //   temp = JSON.stringify(temp);
-    //   $('#UserDataTable > tbody:last')
-    //   .append('<tr><td>'+filename+'</td>'
-    //   +'<td>'+JSON.parse(temp).Look+'</td>'
-    //   +'<td>'+JSON.parse(temp).Download+'</td></tr>');
-    // }
     for(var i=content_cnt-1;i>=content_cnt-10;i--)
     {
       if(content[i])
@@ -276,8 +273,8 @@ const App = {
       //file수정
       $('#UserDataTable > tbody:last')
       .append('<tr><td>'+filename[i].name+'.csv'+'</td>'
-      +'<td>'+await this.callLookCount(filename[i].name)+" ROW"+'</td>'
-      +'<td>'+await this.callDownloadCount(filename[i].name)+" ROW"+'</td></tr>');
+      +'<td>'+await this.callLookCount(filename[i].name)+" Row"+'</td>'
+      +'<td>'+await this.callDownloadCount(filename[i].name)+" Row"+'</td></tr>');
     }
   },
 
@@ -342,6 +339,9 @@ const App = {
     if((await this.callOwner()).toLowerCase() === walletInstance.address){
       document.getElementById("test1").style.visibility='visible';
       document.getElementById("test2").style.visibility='visible';
+      document.getElementById("test3").style.visibility='visible';
+      document.getElementById("test4").style.visibility='visible';
+      document.getElementById("test5").style.visibility='visible';
       document.getElementById("myAddress").style.visibility='hidden';
       document.getElementById("look_cnt").style.visibility='hidden';
       document.getElementById("login_cnt").style.visibility='hidden';
@@ -356,6 +356,9 @@ const App = {
     else{
       document.getElementById("test1").style.visibility='hidden';
       document.getElementById("test2").style.visibility='hidden';
+      document.getElementById("test3").style.visibility='hidden';
+      document.getElementById("test4").style.visibility='hidden';
+      document.getElementById("test5").style.visibility='hidden';
       document.getElementById("myAddress").style.visibility='visible';
       document.getElementById("look_cnt").style.visibility='visible';
       document.getElementById("login_cnt").style.visibility='visible';
@@ -378,7 +381,6 @@ const App = {
 
   sendCheck: function(){
     var filename = sessionStorage.getItem('filename');
-    alert(filename);
     var count =0;
     var box = document.getElementsByName(filename);
     for(var i=0; i<box.length; i++) {
@@ -386,6 +388,7 @@ const App = {
             count++;
         }
     }
+    if(count)
     this.download(count,filename);
   },
 

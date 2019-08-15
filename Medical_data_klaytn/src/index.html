@@ -26,14 +26,7 @@
         <hr />
       </div>
     </div>
-    
-    <div class="container" >
-        <button type="button" 
-        class="btn btn-info pull-right"
-        id="reset"
-        onclick="App.userReset()"
-        >
-        UserReset
+    <div class="container">
         <button type="button" 
         class="btn btn-info pull-right"
         id="logout"
@@ -43,7 +36,7 @@
       </button>
       <button type="button" 
         class="btn btn-info pull-right"
-        id="user10"
+        id="user0"
         onclick="App.testLogin('manager','0xf540096dda1283a3c8d52b1fe80bc111f8ab9b99e5820371cab5cf0e21bccd1f')"
         >
         manager
@@ -51,33 +44,73 @@
       
       <button type="button"
         class="btn btn-info pull-right"
-        id="user9"
-        onclick="App.testLogin('xx손해보험','0x7779f6f689430320987d0b2ad39668a6cc247b49c9b0bb7e8b01e7dfa53dec3c')"
+        id="user1"
+        onclick="App.testLogin('K 손해보험','0x7779f6f689430320987d0b2ad39668a6cc247b49c9b0bb7e8b01e7dfa53dec3c')"
         >
         user1
       </button>
       
       <button type="button"
         class="btn btn-info pull-right"
-        id="user8"
-        onclick="App.testLogin('xx화재','0xb230f24080a7368dabae75dc372e05a183d20224b45e1640c430f7d6c60b08fb')"
+        id="user2"
+        onclick="App.testLogin('S 생명','0xb230f24080a7368dabae75dc372e05a183d20224b45e1640c430f7d6c60b08fb')"
         >
         user2
+ 	<button type="button"
+        class="btn btn-info pull-right"
+        id="user3"
+        onclick="App.testLogin('M 화재','0x7804dd23869aa8fc429616e13c185657b0b6eed6c3b47a4ed53db6fd3d1e476c')"
+        >
+        user3 
+	<button type="button"
+        class="btn btn-info pull-right"
+        id="user4"
+        onclick="App.testLogin('H 해상','0xbc2c8502fff64de0b812fb2ba9c7441960e30182f56aa24c151f50acafdc8a27')"
+        >
+        user4
+	<button type="button"
+        class="btn btn-info pull-right"
+        id="user5"
+        onclick="App.testLogin('S 화재','0x9491bf7b61dd05ca4023f3675895e03ec902a7cffd9f5fc7d0e33a583495562a')"
+        >
+        user5
       </button>
       <button type="button"
       class="btn btn-info default"
       id="test1"
       onclick="App.findUsers('0xD22E6E595bB40ABE9B4e75F120126c22634d98eC')"
       >
-      test user1 조회
+      user1 조회
     </button>
       <button type="button"
       class="btn btn-info default"
       id="test2"
       onclick="App.findUsers('0x3b0e7B486ceF8334EcE5330c916870053c7AD7f1')"
       >
-      test user2 조회
+      user2 조회
     </button>
+    <button type="button"
+      class="btn btn-info default"
+      id="test3"
+      onclick="App.findUsers('0x4bcd4f27fab97a751ec013f4e7bf28c9a31b2b60')"
+      >
+      user3 조회
+    </button>
+    <button type="button"
+      class="btn btn-info default"
+      id="test4"
+      onclick="App.findUsers('0xf33918a15b6a79583811dc9bef335f55f0a7ecac')"
+      >
+      user4 조회
+    </button>
+    <button type="button"
+      class="btn btn-info default"
+      id="test5"
+      onclick="App.findUsers('0x2926188cbe1b9c8b882c965048899764342d1580')"
+      >
+      user5 조회
+    </button>
+
     </div>
   </br>
     <div class="text-center" id="company"></div>
@@ -121,7 +154,7 @@
             <th>Tx내용</th>
             <th>파일명</th>
             <th>데이터량</th>
-            <th>checkURL</th>
+            <th>Check Transaction</th>
           </tr>
         </thead>
         <tbody>
@@ -133,10 +166,18 @@
       <button class="btns dblist" onclick="App.dbGetFile('patients')">patients.csv</button>
       <button class="btns dblist" onclick="App.dbGetFile('transfers')">transfers.csv</button>
       <button class="btns dblist" onclick="App.dbGetFile('services')">services.csv</button>
+      <button class="btns dblist" onclick="App.dbGetFile('callout')">callout.csv</button>
+      <button class="btns dblist" onclick="App.dbGetFile('cptevents')">cptevents.csv</button>
+      <button class="btns dblist" onclick="App.dbGetFile('d_cpt')">d_cpt.csv</button>
+      <button class="btns dblist" onclick="App.dbGetFile('d_labitems')">d_labitems.csv</button>
+      <button class="btns dblist" onclick="App.dbGetFile('diagnoses_icd')">diagnoses_icd.csv</button>
+      <button class="btns dblist" onclick="App.dbGetFile('drgcodes')">drgcodes.csv</button>
+      <button class="btns dblist" onclick="App.dbGetFile('procedures_icd')">procedures.csv</button>
+
     </div>
       <!-- <input type="file" id="files" name="files[]" multiple />
     <output id="list"></output> -->    
-    <table id="OutputTable">
+    <table id="OutputTable" align="left">
       <thead><tr>
       </tr></thead>
       <tbody>
@@ -144,52 +185,9 @@
         </tr>
       </tbody>
     </table>
-    <!-- <script>
-      var table = document.getElementById('OutputTable');
-      function parseCSV(text, lineTerminator, cellTerminator) {     
-        //break the lines apart
-        var lines = text.split(lineTerminator);
-        var hdinformation = lines[0].split(',');
-        App.reading(lines.length-2);
-        $('#OutputTable > thead:last')
-        .append('<th><input type="checkbox" id="checkAll" onclick="App.check_all()"></th>');
-        for(var k = 0; k < hdinformation.length; k++){
-          $('#OutputTable > thead:last').append('<th>'+hdinformation[k]+'</th>')
-        }
-        for(var j = 1; j<lines.length; j++){
-          var information =lines[j].split(',');
-          if(lines[j] != ""){
-          $('#OutputTable > tbody:last')
-          .append('<td><input type="checkbox" name="patient"></td>');
-           for(var k = 0; k < information.length; k++){
-            $('#OutputTable > tbody:last').append('<td>'+information[k]+'</td>');
-          }
-          $('#OutputTable > tbody:last').append('<tr>');
-          }
-        }
-      }
-      function handleFileSelect(evt) {
-      var files = evt.target.files; // FileList object
-      // Loop through the FileList and populate the 'outputTable' with the data
-        for (var i = 0, f; f = files[i]; i++) {
-          var reader = new FileReader();
-          // Closure to capture the file information.
-          reader.onload = (function(theFile) {
-          return function(e) {         
-            //call the parse function with the proper line terminator and cell terminator
-            parseCSV(e.target.result, '\n', ';');
-            alert(e.target.result);
-          };
-          })(f);
-          // Read the file as text
-          reader.readAsText(f, "euc-kr");
-        }
-      }
-      document.getElementById('files').addEventListener('change', handleFileSelect, false);
-</script> -->
-<button type="button" class="btn btn-info default" id="DBbutton" onclick="App.sendCheck()">데이터 조회</button>
+    <button type="button" class="btn btn-info default" id="DBbutton" onclick="App.sendCheck()">데이터 다운로드</button>
     <br />
-    <div id="spin"></div>
+    <div id="spin" style="position:fixed;top:50%;left:50%"></div>
   </div>
 </body>
 
@@ -236,14 +234,6 @@
   }
 
   #DBbutton{
-    visibility: hidden;
-  }
-
-  #test1{
-    visibility: hidden;
-  }
-
-  #test2{
     visibility: hidden;
   }
 
@@ -356,7 +346,7 @@
   #OutputTable{
     border-collapse: separate;
     border-spacing: 1px;
-    text-align: center;
+    text-align: left;
     line-height: 1.5;
     margin: 20px 10px;
   }
