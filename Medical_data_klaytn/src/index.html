@@ -30,14 +30,14 @@
         <button type="button" 
         class="btn btn-info pull-right"
         id="logout"
-        onclick="App.testLogout()"
+        onclick="App.logout()"
         >
         Logout
       </button>
       <button type="button" 
         class="btn btn-info pull-right"
         id="user0"
-        onclick="App.testLogin('manager','0xf540096dda1283a3c8d52b1fe80bc111f8ab9b99e5820371cab5cf0e21bccd1f')"
+        onclick="App.login('manager','0xf540096dda1283a3c8d52b1fe80bc111f8ab9b99e5820371cab5cf0e21bccd1f')"
         >
         manager
       </button>
@@ -45,7 +45,7 @@
       <button type="button"
         class="btn btn-info pull-right"
         id="user1"
-        onclick="App.testLogin('K 손해보험','0x7779f6f689430320987d0b2ad39668a6cc247b49c9b0bb7e8b01e7dfa53dec3c')"
+        onclick="App.login('K 손해보험','0x7779f6f689430320987d0b2ad39668a6cc247b49c9b0bb7e8b01e7dfa53dec3c')"
         >
         user1
       </button>
@@ -53,25 +53,25 @@
       <button type="button"
         class="btn btn-info pull-right"
         id="user2"
-        onclick="App.testLogin('S 생명','0xb230f24080a7368dabae75dc372e05a183d20224b45e1640c430f7d6c60b08fb')"
+        onclick="App.login('S 생명','0xb230f24080a7368dabae75dc372e05a183d20224b45e1640c430f7d6c60b08fb')"
         >
         user2
  	<button type="button"
         class="btn btn-info pull-right"
         id="user3"
-        onclick="App.testLogin('M 화재','0x7804dd23869aa8fc429616e13c185657b0b6eed6c3b47a4ed53db6fd3d1e476c')"
+        onclick="App.login('M 화재','0x7804dd23869aa8fc429616e13c185657b0b6eed6c3b47a4ed53db6fd3d1e476c')"
         >
         user3 
 	<button type="button"
         class="btn btn-info pull-right"
         id="user4"
-        onclick="App.testLogin('H 해상','0xbc2c8502fff64de0b812fb2ba9c7441960e30182f56aa24c151f50acafdc8a27')"
+        onclick="App.login('H 해상','0xbc2c8502fff64de0b812fb2ba9c7441960e30182f56aa24c151f50acafdc8a27')"
         >
         user4
 	<button type="button"
         class="btn btn-info pull-right"
         id="user5"
-        onclick="App.testLogin('S 화재','0x9491bf7b61dd05ca4023f3675895e03ec902a7cffd9f5fc7d0e33a583495562a')"
+        onclick="App.login('S 화재','0x9491bf7b61dd05ca4023f3675895e03ec902a7cffd9f5fc7d0e33a583495562a')"
         >
         user5
       </button>
@@ -175,9 +175,7 @@
       <button class="btns dblist" onclick="App.dbGetFile('procedures_icd')">procedures.csv</button>
 
     </div>
-      <!-- <input type="file" id="files" name="files[]" multiple />
-    <output id="list"></output> -->    
-    <table id="OutputTable" align="left">
+    <table id="OutputTable">
       <thead><tr>
       </tr></thead>
       <tbody>

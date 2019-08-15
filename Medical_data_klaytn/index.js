@@ -1,6 +1,5 @@
 import Caver from "caver-js";
 import {Spinner} from "spin.js";
-const keccak256 = require('keccak256');
 
 const config={
   rpcURL: 'https://api.baobab.klaytn.net:8651'
@@ -19,42 +18,6 @@ const App = {
     file: "",
     cnt: 0,
   },
-  userReset: async function(){
-    this.setInit();
-    location.reload();
-  },
-
-  testLogout: async function(){
-    sessionStorage.removeItem('walletInstance');
-    document.getElementById("user0").style.visibility='visible';
-    document.getElementById("user1").style.visibility='visible';
-    document.getElementById("user2").style.visibility='visible';
-    document.getElementById("user3").style.visibility='visible';
-    document.getElementById("user4").style.visibility='visible';
-    document.getElementById("user5").style.visibility='visible';
-    location.reload();
-  },
-
-  dbSetTxinfo: async function(_name,_time,_txinfo,_filename,_data,_txnum){
-    let datas ={
-      id: 0,
-      name: _name,
-      time: _time,
-      txinfo: _txinfo,
-      filename: _filename,
-      data: _data,
-      txnum: _txnum
-    }
-    var request = await new Request('/api/setData', {
-      method: 'POST', 
-      body:JSON.stringify(datas), 
-      headers: new Headers( {'Content-Type': 'application/json'
-    })
-    });
-    fetch(request).then(function(){
-		console.log("ok");}).catch(function(){
-console.log(error); });
-  },
 
   start: async function () {
     await this.dbGetFilename();
@@ -70,98 +33,18 @@ console.log(error); });
     }
   },
 
-  download: async function(num,filename){
-    var spinner = this.showSpinner();
-    //file수정
-    mdContract.methods.Download(num,filename).send({
-      type:'SMART_CONTRACT_EXECUTION',
-      from: JSON.parse(sessionStorage.getItem('walletInstance')).address ,
-      gas: '250000',
-    }).then(async function(receipt){
-      if(receipt.status){
-        spinner.stop();
-        alert(JSON.parse(sessionStorage.getItem('walletInstance')).address + "계정 "+filename+'.csv파일에서 '+num+"ROW 데이터 다운로드"); 
-        await App.dbSetTxinfo(
-          await App.callCompnayName(), //name
-          await App.blocktime(JSON.stringify(receipt)), //time
-          "다운로드",
-          filename,
-          num,
-          JSON.stringify(receipt.transactionHash),
-        )
-        location.reload();
-      }
-    })
+  logout: async function(){
+    sessionStorage.removeItem('walletInstance');
+    document.getElementById("user0").style.visibility='visible';
+    document.getElementById("user1").style.visibility='visible';
+    document.getElementById("user2").style.visibility='visible';
+    document.getElementById("user3").style.visibility='visible';
+    document.getElementById("user4").style.visibility='visible';
+    document.getElementById("user5").style.visibility='visible';
+    location.reload();
   },
 
-  reading: async function(num,filename){
-    var spinner = this.showSpinner();
-    //file수정
-    mdContract.methods.reading(num,filename).send({
-      type:'SMART_CONTRACT_EXECUTION',
-      from: JSON.parse(sessionStorage.getItem('walletInstance')).address ,
-      gas: '250000',
-    }).then(async function(receipt){
-      if(receipt.status){
-        spinner.stop();
-        alert(JSON.parse(sessionStorage.getItem('walletInstance')).address + "계정 "+num+"개 데이터 조회"); 
-        await App.dbSetTxinfo(
-          await App.callCompnayName(), //name
-          await App.blocktime(JSON.stringify(receipt)), //time
-          "데이터 조회",
-          filename,
-          num,
-          JSON.stringify(receipt.transactionHash),
-        )  
-        var content =await App.dbGetTxinfo(await App.callCompnayName());
-        $('#TxTable>tbody').empty();
-        for(var i=content.length-1;i>=content.length-10;i--)
-        {
-          if(content[i])
-          await App.transactionList(content[i]);
-        }
-        $('#UserDataTable>tbody').empty();
-        await App.userDataList();
-      }
-    })
-  },
-
-  setInit: async function(){
-    var str = await this.callCompnayName();
-    for(var i=0;i<=sessionStorage.getItem(str+'cnt');i++)
-        sessionStorage.removeItem(str+'tx'+i);
-    sessionStorage.setItem(str+'cnt',0);
-  },
-
-  callOwner: async function () {
-    return await mdContract.methods.owner().call();
-  },
-
-  callContractBalance: async function () {
-    return await mdContract.methods.getBalance().call();
-  },
-
-  callLookCount: async function(filename){
-    return await mdContract.methods.getLookCount(this.getWallet().address,filename).call();
-  },
-
-  callDownloadCount: async function(filename){
-    return await mdContract.methods.getDownloadCount(this.getWallet().address,filename).call();
-  },
-
-  callLoginCount: async function(){
-    return await mdContract.methods.getLoginCount(this.getWallet().address).call();
-  },
-
-  callCompnayName: async function(){
-    return await mdContract.methods.getCompany(this.getWallet().address).call();
-  },
-  
-  getWallet: function () {
-    return JSON.parse(sessionStorage.getItem('walletInstance'));
-  },
-
-  testLogin: async function (id,privateKey) {
+  login: async function (id,privateKey) {
     var spinner = this.showSpinner();
     try{
      await this.integrateWallet(id,privateKey);
@@ -196,6 +79,84 @@ console.log(error); });
     sessionStorage.setItem('walletInstance',JSON.stringify(walletInstance));
   },
 
+  download: async function(num,filename){
+    var spinner = this.showSpinner();
+    mdContract.methods.Download(num,filename).send({
+      type:'SMART_CONTRACT_EXECUTION',
+      from: JSON.parse(sessionStorage.getItem('walletInstance')).address ,
+      gas: '250000',
+    }).then(async function(receipt){
+      if(receipt.status){
+        spinner.stop();
+        alert(JSON.parse(sessionStorage.getItem('walletInstance')).address + "계정 "+filename+'.csv파일에서 '+num+"ROW 데이터 다운로드"); 
+        await App.dbSetTxinfo(
+          await App.callCompnayName(), //name
+          await App.blocktime(JSON.stringify(receipt)), //time
+          "다운로드",
+          filename,
+          num,
+          JSON.stringify(receipt.transactionHash),
+        )
+        location.reload();
+      }
+    })
+  },
+
+  reading: async function(num,filename){
+    var spinner = this.showSpinner();
+    mdContract.methods.reading(num,filename).send({
+      type:'SMART_CONTRACT_EXECUTION',
+      from: JSON.parse(sessionStorage.getItem('walletInstance')).address ,
+      gas: '250000',
+    }).then(async function(receipt){
+      if(receipt.status){
+        spinner.stop();
+        alert(JSON.parse(sessionStorage.getItem('walletInstance')).address + "계정 "+num+"개 데이터 조회"); 
+        await App.dbSetTxinfo(
+          await App.callCompnayName(), //name
+          await App.blocktime(JSON.stringify(receipt)), //time
+          "데이터 조회",
+          filename,
+          num,
+          JSON.stringify(receipt.transactionHash),
+        )  
+        var content =await App.dbGetTxinfo(await App.callCompnayName());
+        $('#TxTable>tbody').empty();
+        for(var i=content.length-1;i>=content.length-10;i--)
+        {
+          if(content[i])
+          await App.transactionList(content[i]);
+        }
+        $('#UserDataTable>tbody').empty();
+        await App.userDataList();
+      }
+    })
+  },
+
+  callOwner: async function () {
+    return await mdContract.methods.owner().call();
+  },
+
+  callLookCount: async function(filename){
+    return await mdContract.methods.getLookCount(this.getWallet().address,filename).call();
+  },
+
+  callDownloadCount: async function(filename){
+    return await mdContract.methods.getDownloadCount(this.getWallet().address,filename).call();
+  },
+
+  callLoginCount: async function(){
+    return await mdContract.methods.getLoginCount(this.getWallet().address).call();
+  },
+
+  callCompnayName: async function(){
+    return await mdContract.methods.getCompany(this.getWallet().address).call();
+  },
+  
+  getWallet: function () {
+    return JSON.parse(sessionStorage.getItem('walletInstance'));
+  },
+
   findUsers: async function(add){
     $('#TxTable>tbody').empty();
     $('#UserTable>tbody').empty();
@@ -210,7 +171,6 @@ console.log(error); });
     var filename=await this.dbGetFilename();
     for(var i=0;i<filename.length;i++)
     {
-      //file수정
       $('#UserDataTable > tbody:last')
       .append('<tr><td>'+filename[i].name+'.csv'+'</td>'
       +'<td>'+ await mdContract.methods.getLookCount(add,filename[i].name).call()+' Row'+'</td>'
@@ -270,12 +230,33 @@ console.log(error); });
     var filename=await this.dbGetFilename();
     for(var i=0;i<filename.length;i++)
     {
-      //file수정
       $('#UserDataTable > tbody:last')
       .append('<tr><td>'+filename[i].name+'.csv'+'</td>'
       +'<td>'+await this.callLookCount(filename[i].name)+" Row"+'</td>'
       +'<td>'+await this.callDownloadCount(filename[i].name)+" Row"+'</td></tr>');
     }
+  },
+
+  dbSetTxinfo: async function(_name,_time,_txinfo,_filename,_data,_txnum){
+    let datas ={
+      id: 0,
+      name: _name,
+      time: _time,
+      txinfo: _txinfo,
+      filename: _filename,
+      data: _data,
+      txnum: _txnum
+    }
+    var request = await new Request('/api/setData', {
+        method: 'POST', 
+        body:JSON.stringify(datas), 
+        headers: new Headers( {'Content-Type': 'application/json'
+      })
+    });
+    fetch(request).then(function(){
+    console.log("ok");})
+    .catch(function(){
+    console.log(error); });
   },
 
   dbGetTxinfo : async function(_name){
